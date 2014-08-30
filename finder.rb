@@ -10,16 +10,12 @@ b = [
   [0,1,0]
 ]
 
-e0 = a[0].each_cons(b[0].length).map do |aa|
-  aa == b[0]
-end.map(&:to_i)
+e = []
 
-e1 = a[1].each_cons(b[1].length).map do |aa|
-  aa == b[1]
-end.map(&:to_i)
+(0..1).each do |i|
+  e[i] = a[i].each_cons(b[0].length).map do |aa|
+    aa == b[i]
+  end.map(&:to_i)
+end
 
-e2 = e1
-
-x = e0.zip(e1, e2).map {|a| a.inject(:+)}.index(3)
-
-abort x.inspect
+abort e.inspect
