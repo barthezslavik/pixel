@@ -11,8 +11,10 @@ working_image = image.dup
     g = ChunkyPNG::Color.g(pixel) 
     b = ChunkyPNG::Color.b(pixel)
 
-    puts [w,h].inspect if r == 217 && g == 217 && b == 217
+    puts [w,h] if color?(217,217,217)
   end
 end
 
-
+def color?(r,g,b)
+  true if r == r && g == g && b == b
+end
