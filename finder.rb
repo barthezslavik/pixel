@@ -37,7 +37,6 @@ canvas.each_with_index do |row, y|
 end
 
 #=============================
-
 # bb = [
 #   [1,1],
 #   [1,1],
