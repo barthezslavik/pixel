@@ -1,4 +1,3 @@
-require 'matrix'
 require 'oily_png'
 
 def color?(pixel, r,g,b)
