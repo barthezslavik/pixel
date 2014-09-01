@@ -20,7 +20,6 @@ canvas.each_with_index do |row, y|
     row.each_with_index do |col, x|
       c = row.each_cons(m.count).map {|aa| m == aa}.map(&:to_i)
     end
-    puts coords.inspect
     c.each_with_index do |cc,i|
       next if cc == 0
       head = i
@@ -34,6 +33,6 @@ canvas.each_with_index do |row, y|
     end
   end
 
-  puts coords.uniq.inspect unless coords.empty?
+  puts coords.compact.uniq.flatten(1).inspect unless coords.empty?
 
 end
