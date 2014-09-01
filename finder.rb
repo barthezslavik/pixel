@@ -34,8 +34,10 @@ bitmap.each_slice(image.width-1) do |b|
 end
 
 mask = [
-  [1,0],
-  [1,0]
+  [0,0,1,1],
+  [0,0,0,0],
+  [1,0,0,0],
+  [1,0,0,0]
 ]
 
 canvas.each_with_index do |row, y|
