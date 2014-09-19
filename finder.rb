@@ -19,7 +19,7 @@ bitmap = []
 
 (0..image.width-1).each do |w|
   (0..image.height-1).each do |h|
-    if color?(working_image.get_pixel(w,h), 216,216,216)
+    if color?(working_image.get_pixel(w,h), 0,0,0)
       bitmap << 1
     else
       bitmap << 0
@@ -33,12 +33,20 @@ bitmap.each_slice(image.width-1) do |b|
   canvas << b
 end
 
+abort canvas.inspect
+
 mask = [
   [0,0,1,1],
   [0,0,0,0],
   [1,0,0,0],
   [1,0,0,0]
 ]
+
+canvas.each do |c|
+  puts c.inspect if c.include?(1)
+end
+
+abort "=====================================".inspect
 
 canvas.each_with_index do |row, y|
   c = []
