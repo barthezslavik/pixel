@@ -14,6 +14,8 @@ sample.each do |s|
   puts s.inspect
 end
 
+puts " "
+
 data.each do |d|
   puts d.inspect
 end
