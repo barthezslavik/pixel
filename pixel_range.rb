@@ -36,11 +36,11 @@ class PixelRange
         min_y = find_border(sample.transpose[x], y, :head)
         max_y = find_border(sample.transpose[x], y, :tail)
         
-        data << [x, y, min_x, max_x, min_y, max_y]
-        #data << { x:x, y:y, min_x: min_x, max_x: max_x, min_y: min_y, max_y: max_y }
+        #data << [x, y, min_x, max_x, min_y, max_y]
+        data << [min_x, max_x, min_y, max_y]
       end
     end
 
-    return data
+    return data.uniq!
   end
 end

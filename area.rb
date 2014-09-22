@@ -26,9 +26,9 @@ sample3 = [
 ]
 
 pixel_range = PixelRange.new
-data = pixel_range.fetch(sample2)
+data = pixel_range.fetch(sample)
 
-sample2.each do |s|
+sample.each do |s|
   puts s.inspect
 end
 
