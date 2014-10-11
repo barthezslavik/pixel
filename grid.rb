@@ -41,11 +41,8 @@ end
 
 horizontal_at = []
 by_y.map {|g| (g*100/size[:x]).to_i }.each_with_index do |d, i|
-  horizontal_at << i if d < 95
+  horizontal_at << i if d < 96
 end
-
-#abort vertical_at.inspect
-#abort horizontal_at.inspect
 
 png = ChunkyPNG::Image.new(size[:x], size[:y], :white)
 
