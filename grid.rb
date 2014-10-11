@@ -10,6 +10,7 @@ working_image = image.dup
 
 data = []
 by_x = []
+by_y = []
 
 size = { x:image.width, y:image.height }
 
@@ -23,19 +24,39 @@ size = { x:image.width, y:image.height }
   by_x << data[x]
 end
 
-distr = by_x.map {|g| (g*100/size[:y]).to_i }
+(0..image.height-1).each do |y|
+  data[y] = 0
+  (0..image.width-1).each do |x|
+    if color(working_image.get_pixel(x,y)) == [255,255,255]
+      data[y] += 1
+    end
+  end
+  by_y << data[y]
+end
 
-lines_at = []
+vertical_at = []
+by_x.map {|g| (g*100/size[:y]).to_i }.each_with_index do |d, i|
+  vertical_at << i if d < 95
+end
 
-distr.each_with_index do |d, i|
-  if d < 95
-    lines_at << i
+horizontal_at = []
+by_y.map {|g| (g*100/size[:x]).to_i }.each_with_index do |d, i|
+  horizontal_at << i if d < 95
+end
+
+#abort vertical_at.inspect
+#abort horizontal_at.inspect
+
+png = ChunkyPNG::Image.new(size[:x], size[:y], :white)
+
+vertical_at.each do |x|
+  (0..size[:y]-1).each do |y|
+    png[x,y] = ChunkyPNG::Color(:black)
   end
 end
 
-png = ChunkyPNG::Image.new(size[:x], size[:y], :white)
-lines_at.each do |x|
-  (0..size[:y]-1).each do |y|
+horizontal_at.each do |y|
+  (0..size[:x]-1).each do |x|
     png[x,y] = ChunkyPNG::Color(:black)
   end
 end
