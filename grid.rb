@@ -20,52 +20,49 @@ def vertical(image)
     by_x << data[x]
   end
 
-  by_x.map {|g| (g*100/image.height).to_i }.each_with_index do |d, i|
+  by_x.map {|col| (col*100/image.height).to_i }.each_with_index do |d, i|
     result << i if d < 95
   end
 
   result
 end
 
-image = ChunkyPNG::Image.from_file('grid_original.png')
-#working_image = image.dup
+def horizontal(image)
+  blocks = vertical(image)
+  tracks = []
 
-by_y = []
+  blocks.each_with_index do |b,i|
+    tracks << [b, blocks[i+1]]
+  end
 
-c = []
-(0..image.height-1).each do |y|
-  #data[y] = 0
-  (0..image.width-1).each do |x|
-    if color(image.get_pixel(x,y)) != [255,255,255]
-      #data[y] += 1
-      c << [x,y]
+  tracks = tracks[0...-1]
+
+  data = []
+  result = []
+  tracks.each do |t|
+    (0..image.height-1).each do |y|
+      data[y] = 0
+      (t[0]+1..t[1]-1).each do |x|
+        if color(image.get_pixel(x,y)) == [255,255,255]
+          data[y] += 1
+        end
+      end
+      d = ((data[y]*100)/(t[1]-t[0]-1)).to_i
+      result << [t[0]..t[1], y] if d < 100
     end
   end
-  #by_y << data[y]
+  result
 end
 
-#abort c.inspect
-
-#abort [vertical_at, by_y].inspect
-
-#horizontal_at = []
-#by_y.map {|g| (g*100/size[:x]).to_i }.each_with_index do |d, i|
-#  horizontal_at << i if d < 96
-#end
-
-
+image = ChunkyPNG::Image.from_file('grid_original.png')
 png = ChunkyPNG::Image.new(image.width, image.height, :white)
+
+abort horizontal(image).inspect
 
 vertical(image).each do |x|
   (0..image.height-1).each do |y|
     png[x,y] = ChunkyPNG::Color(:black)
   end
 end
-
-#horizontal_at.each do |y|
-#  (0..size[:x]-1).each do |x|
-#    png[x,y] = ChunkyPNG::Color(:black)
-#  end
-#end
 
 png.save('out.png')
