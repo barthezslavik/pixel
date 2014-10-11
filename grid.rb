@@ -57,11 +57,15 @@ end
 image = ChunkyPNG::Image.from_file('grid_original.png')
 png = ChunkyPNG::Image.new(image.width, image.height, :white)
 
-abort horizontal(image).inspect
-
 vertical(image).each do |x|
   (0..image.height-1).each do |y|
     png[x,y] = ChunkyPNG::Color(:black)
+  end
+end
+
+horizontal(image).each do |e|
+  e[0].each do |x|
+    png[x,e[1]] = ChunkyPNG::Color(:black)
   end
 end
 
