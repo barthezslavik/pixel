@@ -24,7 +24,22 @@ def vertical(image)
     result << i if d < 95
   end
 
-  result
+  ranges = result.sort.uniq.inject([]) do |spans, n|
+    if spans.empty? || spans.last.last != n - 1
+      spans + [n..n]
+    else
+      spans[0..-2] + [spans.last.first..n]
+    end
+  end
+
+  edges = []
+
+  ranges.each do |r|
+    edges << r.first
+    edges << r.last
+  end
+
+  edges
 end
 
 def horizontal(image)
