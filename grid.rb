@@ -1,6 +1,8 @@
 require 'oily_png'
 require 'pp'
 
+$sizes = []
+
 def color(pixel)
   [:r, :g, :b].map{|c| ChunkyPNG::Color.send(c, pixel)}
 end
@@ -38,6 +40,12 @@ def vertical(image)
     edges << r.first
     edges << r.last
   end
+
+  edges.each_with_index do |e,i|
+    $sizes[i] = edges[i] - edges[i-1] unless i == 0
+  end
+
+  $sizes[0] = edges[0]
 
   edges
 end
@@ -85,3 +93,5 @@ horizontal(image).each do |e|
 end
 
 png.save('out.png')
+
+abort $sizes.inspect
