@@ -2,7 +2,7 @@ require 'oily_png'
 require 'pp'
 
 def color(pixel)
-  [:r, :g, :b].map{|c| ChunkyPNG::Color.send(c, pixel)}
+  [:r, :g, :b].map{ |c| ChunkyPNG::Color.send(c, pixel) }
 end
 
 def span(image)
@@ -21,6 +21,7 @@ def span(image)
   end
 
   stream = ""
+  result = []
 
   block_on = false
   block_off = true
@@ -28,22 +29,29 @@ def span(image)
   by_x.each_with_index do |b,i|
     if b == 0 && block_on
       block_on = false
+      result << i
       block_off = true
     end
 
+    result << i if block_on
+
     if b != 0 && block_off
       block_on = true
+      result << i
       block_off = false
     end
-
-    result = "x" if block_on
-    result = "." if block_off
-    stream += result
-    #puts [i, result].inspect
   end
-  abort stream.inspect
+
+  result
 end
 
 image = ChunkyPNG::Image.from_file('header.png')
+png = ChunkyPNG::Image.new(image.width, image.height, :white)
 
-span(image)
+span(image).each do |x|
+  (0..image.height-1).each do |y|
+    png[x,y] = ChunkyPNG::Color(:black)
+  end
+end
+
+png.save('out.png')
