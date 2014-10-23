@@ -43,6 +43,7 @@ def span(image)
   end
 
   result
+  abort result.inspect
 end
 
 image = ChunkyPNG::Image.from_file('header.png')
