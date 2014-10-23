@@ -31,24 +31,17 @@ class Parser
     end
 
     ranges.each do |r|
-      top = 0
-      bottom = 0
-      a = []
+      fill = []
       (0..image.height-1).each do |y|
         clear = true
         r.each do |x|
           c = color(@image.get_pixel(x,y))
           clear = false if c != [245,245,245]
         end
-        a << [clear,y]
-        if top == 0 && clear == false
-          top = y
-          bottom = top
-        end
-        if bottom != 0 && clear == true
-          bottom = y
-        end
+        fill << [clear,y]
       end
+      top = fill.each { |f| break f.last if f.first == false }
+      bottom = fill.reverse.each { |f| break f.last if f.first == false }
       objects << { min_x: r.first, min_y: top, max_x: r.last, max_y: bottom }
     end
   end
@@ -61,24 +54,26 @@ class Parser
     @image = ChunkyPNG::Image.from_file(image)
     
     get_objects
-
-    #objects.
-
     output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
+    
+    objects.each do |o|
+      (o[:min_x]..o[:max_x]).each do |x|
+        output[x,o[:min_y]] = ChunkyPNG::Color(:black)
+      end
 
-    #v(image).each do |x|
-    #  (0..image.height-1).each do |y|
-    #    png[x,y] = ChunkyPNG::Color(:black)
-    #  end
-    #end
+      (o[:min_x]..o[:max_x]).each do |x|
+        output[x,o[:max_y]] = ChunkyPNG::Color(:black)
+      end
 
-    #h(image).each_with_index do |v,x|
-    #  (0..image.height-1).each do |y|
-    #    png[x,y] = ChunkyPNG::Color(:black) if v > 0
-    #  end
-    #end
+      (o[:min_y]..o[:max_y]).each do |y|
+        output[o[:min_x],y] = ChunkyPNG::Color(:black)
+      end
+
+      (o[:min_y]..o[:max_y]).each do |y|
+        output[o[:max_x],y] = ChunkyPNG::Color(:black)
+      end
+    end
 
     output.save('static/output.png')
   end
-
 end
