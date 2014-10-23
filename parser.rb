@@ -1,4 +1,6 @@
 class Parser
+  attr_accessor :result
+
   def color(pixel)
     [:r, :g, :b].map{ |c| ChunkyPNG::Color.send(c, pixel) }
   end
@@ -19,7 +21,6 @@ class Parser
     end
 
     stream = ""
-    result = []
 
     block_on = false
     block_off = true
@@ -27,24 +28,24 @@ class Parser
     by_x.each_with_index do |b,i|
       if b == 0 && block_on
         block_on = false
-        result << i
+        self.result << i
         block_off = true
       end
 
-      result << i if block_on
+      self.result << i if block_on
 
       if b != 0 && block_off
         block_on = true
-        result << i
+        self.result << i
         block_off = false
       end
     end
 
-    result
-    #abort result.inspect
+    self.result
   end
 
   def initialize(image)
+    self.result = []
     image = ChunkyPNG::Image.from_file(image)
     png = ChunkyPNG::Image.new(image.width, image.height, :white)
 
