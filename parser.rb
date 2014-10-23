@@ -1,109 +1,82 @@
 class Parser
-  attr_accessor :result, :by_x, :h_sizes
+  attr_accessor :result, :by_x, :by_y, :h_sizes, :data, :objects, :image, :edges
 
   def color(pixel)
     [:r, :g, :b].map{ |c| ChunkyPNG::Color.send(c, pixel) }
   end
 
-  def v(image)
-    data = []
-    by_x = []
-    result = []
-
-    (0..image.width-1).each do |x|
-      data[x] = 0
-      (0..image.height-1).each do |y|
-        if color(image.get_pixel(x,y)) == [255,255,255]
-          data[x] += 1
-        end
-      end
-      by_x << data[x]
-    end
-
-    abort by_x.inspect
-
-    by_x.map {|col| (col*100/image.height).to_i }.each_with_index do |d, i|
-      result << i if d < 95
-    end
-
-    abort result.inspect
-
-    ranges = result.sort.uniq.inject([]) do |spans, n|
-      if spans.empty? || spans.last.last != n - 1
-        spans + [n..n]
-      else
-        spans[0..-2] + [spans.last.first..n]
-      end
-    end
-
-    edges = []
-
-    ranges.each do |r|
-      edges << r.first
-      edges << r.last
-    end
-
-    edges.each_with_index do |e,i|
-      @h_sizes[i] = edges[i] - edges[i-1] unless i == 0
-    end
-
-    @h_sizes[0] = edges[0]
-
-    edges
-  end
-
-  def h(image)
+  def get_by_x
     map = []
     data = []
-    (0..image.width-1).each do |x|
+    (0..@image.width-1).each do |x|
       data[x] = 0
-      (0..image.height-1).each do |y|
-        c = color(image.get_pixel(x,y))
+      (0..@image.height-1).each do |y|
+        c = color(@image.get_pixel(x,y))
         unless c == [245,245,245]
           data[x] += 1
         end
       end
       by_x << data[x]
     end
+    by_x
+  end
 
-    stream = ""
+  def get_objects
+    by_x.map {|col| (col*100/@image.height).to_i }.each_with_index do |d, i|
+      result << i if d > 0
+    end
 
-    block_on = false
-    block_off = true
-
-    by_x.each_with_index do |b,i|
-      if b == 0 && block_on
-        block_on = false
-        self.result << i
-        block_off = true
-      end
-
-      self.result << i if block_on
-
-      if b != 0 && block_off
-        block_on = true
-        self.result << i
-        block_off = false
+    ranges = result.sort.uniq.inject([]) do |s, n|
+      if s.empty? || s.last.last != n - 1
+        s + [n..n]
+      else
+        s[0..-2] + [s.last.first..n]
       end
     end
 
-    self.result
-    self.by_x
+    ranges.each do |r|
+      top = 0
+      bottom = 0
+      a = []
+      (0..image.height-1).each do |y|
+        clear = true
+        r.each do |x|
+          c = color(@image.get_pixel(x,y))
+          clear = false if c != [245,245,245]
+        end
+        a << [clear,y]
+        if top == 0 && clear == false
+          top = y
+          bottom = top
+        end
+        if bottom != 0 && clear == true
+          bottom = y
+        end
+      end
+      objects << { min_x: r.first, min_y: top, max_x: r.last, max_y: bottom }
+    end
   end
 
   def initialize(image)
-    self.result = []
-    self.by_x = []
-    self.h_sizes = []
+    @result = []
+    @by_x = []
+    @h_sizes = []
+    @by_y = []
+    @edges = []
+    @objects = []
+    @image = ChunkyPNG::Image.from_file(image)
 
-    image = ChunkyPNG::Image.from_file(image)
-    png = ChunkyPNG::Image.new(image.width, image.height, :white)
+    png = ChunkyPNG::Image.new(@image.width, @image.height, :white)
+    get_by_x
+    get_objects
 
-    v(image).each do |x|
-      (0..image.height-1).each do |y|
-        png[x,y] = ChunkyPNG::Color(:black)
-      end
-    end
+    abort objects.inspect
+
+    #v(image).each do |x|
+    #  (0..image.height-1).each do |y|
+    #    png[x,y] = ChunkyPNG::Color(:black)
+    #  end
+    #end
 
     #h(image).each_with_index do |v,x|
     #  (0..image.height-1).each do |y|
