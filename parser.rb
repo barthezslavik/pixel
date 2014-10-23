@@ -44,5 +44,17 @@ class Parser
     #abort result.inspect
   end
 
+  def initialize(image)
+    image = ChunkyPNG::Image.from_file(image)
+    png = ChunkyPNG::Image.new(image.width, image.height, :white)
+
+    span(image).each do |x|
+      (0..image.height-1).each do |y|
+        png[x,y] = ChunkyPNG::Color(:black)
+      end
+    end
+
+    png.save('static/spaces.png')
+  end
 
 end
