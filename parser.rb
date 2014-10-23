@@ -1,14 +1,13 @@
 class Parser
-  attr_accessor :result
+  attr_accessor :result, :by_x
 
   def color(pixel)
     [:r, :g, :b].map{ |c| ChunkyPNG::Color.send(c, pixel) }
   end
 
-  def span(image)
+  def h(image)
     map = []
     data = []
-    by_x = []
     (0..image.width-1).each do |x|
       data[x] = 0
       (0..image.height-1).each do |y|
@@ -42,16 +41,19 @@ class Parser
     end
 
     self.result
+    self.by_x
   end
 
   def initialize(image)
     self.result = []
+    self.by_x = []
+
     image = ChunkyPNG::Image.from_file(image)
     png = ChunkyPNG::Image.new(image.width, image.height, :white)
 
-    span(image).each do |x|
+    h(image).each_with_index do |v,x|
       (0..image.height-1).each do |y|
-        png[x,y] = ChunkyPNG::Color(:black)
+        png[x,y] = ChunkyPNG::Color(:black) if v > 0
       end
     end
 
