@@ -5,9 +5,7 @@ class Parser
     [:r, :g, :b].map{ |c| ChunkyPNG::Color.send(c, pixel) }
   end
 
-  def get_by_x
-    map = []
-    data = []
+  def get_objects
     (0..@image.width-1).each do |x|
       data[x] = 0
       (0..@image.height-1).each do |y|
@@ -19,9 +17,7 @@ class Parser
       by_x << data[x]
     end
     by_x
-  end
 
-  def get_objects
     by_x.map {|col| (col*100/@image.height).to_i }.each_with_index do |d, i|
       result << i if d > 0
     end
@@ -60,17 +56,15 @@ class Parser
   def initialize(image)
     @result = []
     @by_x = []
-    @h_sizes = []
-    @by_y = []
-    @edges = []
+    @data = []
     @objects = []
     @image = ChunkyPNG::Image.from_file(image)
-
-    png = ChunkyPNG::Image.new(@image.width, @image.height, :white)
-    get_by_x
+    
     get_objects
 
-    abort objects.inspect
+    #objects.
+
+    output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
 
     #v(image).each do |x|
     #  (0..image.height-1).each do |y|
@@ -84,7 +78,7 @@ class Parser
     #  end
     #end
 
-    png.save('static/spaces.png')
+    output.save('static/output.png')
   end
 
 end
