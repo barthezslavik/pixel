@@ -3,4 +3,5 @@
 %img{ src: "output.png" }
 %br
 %br
-/= @p.result
+- @p.objects.each do |o|
+  = "#{o.inspect} <br>"
