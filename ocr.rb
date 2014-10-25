@@ -4,6 +4,7 @@ class Ocr
       e.language  = :eng
       e.blacklist = '|'
     }
-    abort e.text_for('static/ocr.png').strip.inspect
+    #abort e.words_for('static/ocr.png').first.methods.inspect#.font_attributes.inspect
+    #abort e.words_for('static/ocr.png').inspect#.font_attributes.inspect
   end
 end

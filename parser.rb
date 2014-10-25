@@ -52,10 +52,10 @@ class Parser
     @data = []
     @objects = []
     @image = ChunkyPNG::Image.from_file(image)
-    
+
     get_objects
     output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
-    
+
     objects.each do |o|
       (o[:min_x]..o[:max_x]).each do |x|
         output[x,o[:min_y]] = ChunkyPNG::Color(:black)
@@ -75,5 +75,11 @@ class Parser
     end
 
     output.save('static/output.png')
+
+    #objects.each_with_index do |o,i|
+    #  output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
+    #  output.save("static/output#{i}.png")
+    #end
+
   end
 end
