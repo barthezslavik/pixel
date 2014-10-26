@@ -1,6 +1,6 @@
 class Parser
   attr_accessor :result, :by_x, :by_y, :h_sizes,
-    :data, :objects, :image, :edges, :groups
+    :data, :objects, :image, :edges, :groups, :distances, :background
 
   def color(pixel)
     [:r, :g, :b].map{ |c| ChunkyPNG::Color.send(c, pixel) }
@@ -11,7 +11,7 @@ class Parser
       data[x] = 0
       (0..@image.height-1).each do |y|
         c = color(@image.get_pixel(x,y))
-        unless c == [245,245,245]
+        unless c == background
           data[x] += 1
         end
       end
@@ -37,7 +37,7 @@ class Parser
         clear = true
         r.each do |x|
           c = color(@image.get_pixel(x,y))
-          clear = false if c != [245,245,245]
+          clear = false if c != background
         end
         fill << [clear,y]
       end
@@ -47,30 +47,44 @@ class Parser
     end
   end
 
-  def get_groups
-    distances = []
+  def get_distances
     objects.each_with_index do |o,i|
-      distances << objects[i+1][:min_x] - objects[i][:max_x] rescue next
-    end
-    peak =  distances.each_with_index.max[1]
-    groups << distances[0..peak-1]
-    groups << distances[peak+1..-1]
-  end
-
-  def group_near
-    distances = []
-    objects.each_with_index do |o,i|
+      next if o[:deep] == 1
       if i <= objects.count-2
         d = objects[i+1][:min_x] - objects[i][:max_x]
         distances << d if d > 0
       end
     end
+  end
+
+  def left_right
+    peak_index =  distances.each_with_index.max[1]
+    #objects[0..peak_index-1].each { |o| o[:deep] = 1 }
+    #objects[peak_index..-1].each { |o| o[:deep] = 1 }
+    
+    min_x_left = objects[0..peak_index].map {|o| o[:min_x]}.min
+    min_y_left = objects[0..peak_index].map {|o| o[:min_y]}.min
+    max_x_left = objects[0..peak_index].map {|o| o[:max_x]}.max
+    max_y_left = objects[0..peak_index].map {|o| o[:max_y]}.max
+    
+    min_x_right = objects[peak_index+1..-1].map {|o| o[:min_x]}.min
+    min_y_right = objects[peak_index+1..-1].map {|o| o[:min_y]}.min
+    max_x_right = objects[peak_index+1..-1].map {|o| o[:max_x]}.max
+    max_y_right = objects[peak_index+1..-1].map {|o| o[:max_y]}.max
+    
+    objects << { min_x: min_x_left, min_y: min_y_left, max_x: max_x_left, max_y: max_y_left }
+    objects << { min_x: min_x_right, min_y: min_y_right, max_x: max_x_right, max_y: max_y_right }
+  end
+
+  def group_near
     glue = []
     distances.each_with_index do |d,i|
       glue << [i,i+1] if d < 7
     end
 
     glue.each do |g|
+      objects[g.first][:deep] = 1
+      objects[g.last][:deep] = 1
       max_y = [objects[g.first][:max_y], objects[g.last][:max_y]].max 
       objects << { min_x: objects[g.first][:min_x], min_y: objects[g.first][:min_y], max_x: objects[g.last][:max_x], max_y: max_y}
     end
@@ -87,20 +101,25 @@ class Parser
 
   def initialize(image)
     @groups = []
+    @distances = []
     @result = []
     @by_x = []
     @data = []
     @objects = []
+    @background = [245,245,245]
+
     @image = ChunkyPNG::Image.from_file(image)
 
     get_objects
-    get_groups
-    get_container
+    get_distances
     group_near
+    left_right
+    get_container
 
     output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
 
     objects.each do |o|
+      next if o[:deep] == 1
       (o[:min_x]..o[:max_x]).each do |x|
         output[x,o[:min_y]] = ChunkyPNG::Color(:black)
       end
@@ -119,11 +138,5 @@ class Parser
     end
 
     output.save('static/output.png')
-
-    #objects.each_with_index do |o,i|
-    #  output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
-    #  output.save("static/output#{i}.png")
-    #end
-
   end
 end
