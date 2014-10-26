@@ -118,6 +118,7 @@ class Parser
 
     output = ChunkyPNG::Image.new(@image.width, @image.height, :white)
 
+    objects[0..-1].each { |o| o[:deep] = 0 }
     objects.each do |o|
       next if o[:deep] == 1
       (o[:min_x]..o[:max_x]).each do |x|
