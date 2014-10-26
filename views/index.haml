@@ -6,4 +6,6 @@
 = "objects:"
 %br
 - @p.objects.each do |o|
+  /- o.delete_if { |k,v| [:min_x, :min_y, :max_x, :max_y, :deep].include? k }
+  - o.delete_if { |k,v| [:deep].include? k }
   = "#{o.inspect} <br>"
