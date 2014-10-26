@@ -3,6 +3,10 @@
 %img{ src: "output.png" }
 %img{ src: "output_red.png" }
 %br
+= "groups: #{@p.groups.inspect}"
+%br
+%br
+= "objects:"
 %br
 - @p.objects.each do |o|
   = "#{o.inspect} <br>"
